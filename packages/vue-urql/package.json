@@ -52,7 +52,7 @@
     "@urql/core": "workspace:*",
     "@vue/test-utils": "^2.3.0",
     "graphql": "^16.0.0",
-    "vue": "^3.2.47"
+    "vue": "^3.4.27"
   },
   "peerDependencies": {
     "@urql/core": "^5.0.0",

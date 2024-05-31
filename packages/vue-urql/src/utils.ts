@@ -1,16 +1,9 @@
 import type { GraphQLRequest, AnyVariables } from '@urql/core';
-import type { Ref, ShallowRef } from 'vue';
-import { isRef } from 'vue';
+import type { MaybeRefOrGetter, ShallowRef } from 'vue';
 
-export type MaybeRef<T> = T | (() => T) | Ref<T>;
-export type MaybeRefObj<T extends {}> = { [K in keyof T]: MaybeRef<T[K]> };
-
-export const unref = <T>(maybeRef: MaybeRef<T>): T =>
-  typeof maybeRef === 'function'
-    ? (maybeRef as () => T)()
-    : maybeRef != null && isRef(maybeRef)
-    ? maybeRef.value
-    : maybeRef;
+export type MaybeRefOrGetterObj<T extends {}> = {
+  [K in keyof T]: MaybeRefOrGetter<T[K]>;
+};
 
 export interface RequestState<
   Data = any,

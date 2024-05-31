@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 
-import type { Ref } from 'vue';
-import { ref } from 'vue';
+import type { MaybeRefOrGetter, Ref } from 'vue';
+import { toValue, ref } from 'vue';
 import type { DocumentNode } from 'graphql';
 import { pipe, onPush, filter, toPromise, take } from 'wonka';
 
@@ -17,8 +17,6 @@ import type {
 import { createRequest } from '@urql/core';
 
 import { useClient } from './useClient';
-import type { MaybeRef } from './utils';
-import { unref } from './utils';
 
 /** State of the last mutation executed by {@link useMutation}.
  *
@@ -132,7 +130,7 @@ export function useMutation<T = any, V extends AnyVariables = AnyVariables>(
 }
 
 export function callUseMutation<T = any, V extends AnyVariables = AnyVariables>(
-  query: MaybeRef<TypedDocumentNode<T, V> | DocumentNode | string>,
+  query: MaybeRefOrGetter<TypedDocumentNode<T, V> | DocumentNode | string>,
   client: Ref<Client> = useClient()
 ): UseMutationResponse<T, V> {
   const data: Ref<T | undefined> = ref();
@@ -157,7 +155,7 @@ export function callUseMutation<T = any, V extends AnyVariables = AnyVariables>(
 
       return pipe(
         client.value.executeMutation<T, V>(
-          createRequest<T, V>(unref(query), unref(variables)),
+          createRequest<T, V>(toValue(query), toValue(variables)),
           context || {}
         ),
         onPush(result => {

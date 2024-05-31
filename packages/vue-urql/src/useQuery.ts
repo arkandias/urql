@@ -1,8 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 
-import type { WatchStopHandle, Ref } from 'vue';
-import { isRef } from 'vue';
-import { shallowRef, ref, watchEffect, reactive } from 'vue';
+import type { WatchStopHandle, Ref, MaybeRefOrGetter } from 'vue';
+import { shallowRef, ref, watchEffect, reactive, isRef, toValue } from 'vue';
 
 import type { Subscription, Source } from 'wonka';
 import { pipe, subscribe, onEnd } from 'wonka';
@@ -20,8 +19,8 @@ import type {
 import { createRequest } from '@urql/core';
 
 import { useClient } from './useClient';
-import type { MaybeRef, MaybeRefObj } from './utils';
-import { unref, updateShallowRef } from './utils';
+import type { MaybeRefOrGetterObj } from './utils';
+import { updateShallowRef } from './utils';
 
 /** Input arguments for the {@link useQuery} function.
  *
@@ -44,7 +43,7 @@ export type UseQueryArgs<
    *
    * @see {@link OperationContext.requestPolicy} for where this value is set.
    */
-  requestPolicy?: MaybeRef<RequestPolicy>;
+  requestPolicy?: MaybeRefOrGetter<RequestPolicy>;
   /** Updates the {@link OperationContext} for the executed GraphQL query operation.
    *
    * @remarks
@@ -62,7 +61,7 @@ export type UseQueryArgs<
    * });
    * ```
    */
-  context?: MaybeRef<Partial<OperationContext>>;
+  context?: MaybeRefOrGetter<Partial<OperationContext>>;
   /** Prevents {@link useQuery} from automatically executing GraphQL query operations.
    *
    * @remarks
@@ -74,8 +73,8 @@ export type UseQueryArgs<
    * @see {@link https://urql.dev/goto/docs/basics/vue#pausing-usequery} for
    * documentation on the `pause` option.
    */
-  pause?: MaybeRef<boolean>;
-} & MaybeRefObj<GraphQLRequestParams<Data, Variables>>;
+  pause?: MaybeRefOrGetter<boolean>;
+} & MaybeRefOrGetterObj<GraphQLRequestParams<Data, Variables>>;
 
 /** State of the current query, your {@link useQuery} function is executing.
  *
@@ -259,8 +258,11 @@ export function callUseQuery<T = any, V extends AnyVariables = AnyVariables>(
     : ref(!!_args.pause);
 
   const input = shallowRef({
-    request: createRequest<T, V>(unref(args.query), unref(args.variables) as V),
-    requestPolicy: unref(args.requestPolicy),
+    request: createRequest<T, V>(
+      toValue(args.query),
+      toValue(args.variables) as V
+    ),
+    requestPolicy: toValue(args.requestPolicy),
     isPaused: isPaused.value,
   });
 
@@ -270,10 +272,10 @@ export function callUseQuery<T = any, V extends AnyVariables = AnyVariables>(
     watchEffect(() => {
       updateShallowRef(input, {
         request: createRequest<T, V>(
-          unref(args.query),
-          unref(args.variables) as V
+          toValue(args.query),
+          toValue(args.variables) as V
         ),
-        requestPolicy: unref(args.requestPolicy),
+        requestPolicy: toValue(args.requestPolicy),
         isPaused: isPaused.value,
       });
     }, watchOptions)
@@ -283,8 +285,8 @@ export function callUseQuery<T = any, V extends AnyVariables = AnyVariables>(
     watchEffect(() => {
       source.value = !input.value.isPaused
         ? client.value.executeQuery<T, V>(input.value.request, {
-            requestPolicy: unref(args.requestPolicy),
-            ...unref(args.context),
+            requestPolicy: toValue(args.requestPolicy),
+            ...toValue(args.context),
           })
         : undefined;
     }, watchOptions)
@@ -302,8 +304,8 @@ export function callUseQuery<T = any, V extends AnyVariables = AnyVariables>(
       const s = (source.value = client.value.executeQuery<T, V>(
         input.value.request,
         {
-          requestPolicy: unref(args.requestPolicy),
-          ...unref(args.context),
+          requestPolicy: toValue(args.requestPolicy),
+          ...toValue(args.context),
           ...opts,
         }
       ));

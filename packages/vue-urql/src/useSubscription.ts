@@ -3,9 +3,8 @@
 import type { Source } from 'wonka';
 import { pipe, subscribe, onEnd } from 'wonka';
 
-import type { WatchStopHandle, Ref } from 'vue';
-import { isRef } from 'vue';
-import { ref, shallowRef, watchEffect, reactive } from 'vue';
+import type { WatchStopHandle, Ref, MaybeRefOrGetter } from 'vue';
+import { ref, shallowRef, watchEffect, reactive, isRef, toValue } from 'vue';
 
 import type {
   Client,
@@ -19,8 +18,8 @@ import type {
 import { createRequest } from '@urql/core';
 
 import { useClient } from './useClient';
-import type { MaybeRef, MaybeRefObj } from './utils';
-import { unref, updateShallowRef } from './utils';
+import type { MaybeRefOrGetterObj } from './utils';
+import { updateShallowRef } from './utils';
 
 /** Input arguments for the {@link useSubscription} function.
  *
@@ -39,7 +38,7 @@ export type UseSubscriptionArgs<
    * {@link UseSubscriptonState.resume} is called, or, if `pause` is a reactive
    * ref of a boolean, until this ref changes to `true`.
    */
-  pause?: MaybeRef<boolean>;
+  pause?: MaybeRefOrGetter<boolean>;
   /** Updates the {@link OperationContext} for the executed GraphQL subscription operation.
    *
    * @remarks
@@ -57,8 +56,8 @@ export type UseSubscriptionArgs<
    * });
    * ```
    */
-  context?: MaybeRef<Partial<OperationContext>>;
-} & MaybeRefObj<GraphQLRequestParams<Data, Variables>>;
+  context?: MaybeRefOrGetter<Partial<OperationContext>>;
+} & MaybeRefOrGetterObj<GraphQLRequestParams<Data, Variables>>;
 
 /** Combines previous data with an incoming subscription result’s data.
  *
@@ -89,7 +88,9 @@ export type UseSubscriptionArgs<
 export type SubscriptionHandler<T, R> = (prev: R | undefined, data: T) => R;
 
 /** A {@link SubscriptionHandler} or a reactive ref of one. */
-export type SubscriptionHandlerArg<T, R> = MaybeRef<SubscriptionHandler<T, R>>;
+export type SubscriptionHandlerArg<T, R> = MaybeRefOrGetter<
+  SubscriptionHandler<T, R>
+>;
 
 /** State of the current query, your {@link useSubscription} function is executing.
  *
@@ -229,7 +230,7 @@ export function useSubscription<
   V extends AnyVariables = AnyVariables,
 >(
   args: UseSubscriptionArgs<T, V>,
-  handler?: MaybeRef<SubscriptionHandler<T, R>>
+  handler?: MaybeRefOrGetter<SubscriptionHandler<T, R>>
 ): UseSubscriptionResponse<T, R, V> {
   return callUseSubscription(args, handler);
 }
@@ -240,7 +241,7 @@ export function callUseSubscription<
   V extends AnyVariables = AnyVariables,
 >(
   _args: UseSubscriptionArgs<T, V>,
-  handler?: MaybeRef<SubscriptionHandler<T, R>>,
+  handler?: MaybeRefOrGetter<SubscriptionHandler<T, R>>,
   client: Ref<Client> = useClient(),
   stops: WatchStopHandle[] = []
 ): UseSubscriptionResponse<T, R, V> {
@@ -259,7 +260,10 @@ export function callUseSubscription<
     : ref(!!_args.pause);
 
   const input = shallowRef({
-    request: createRequest<T, V>(unref(args.query), unref(args.variables) as V),
+    request: createRequest<T, V>(
+      toValue(args.query),
+      toValue(args.variables) as V
+    ),
     isPaused: isPaused.value,
   });
 
@@ -269,8 +273,8 @@ export function callUseSubscription<
     watchEffect(() => {
       updateShallowRef(input, {
         request: createRequest<T, V>(
-          unref(args.query),
-          unref(args.variables) as V
+          toValue(args.query),
+          toValue(args.variables) as V
         ),
         isPaused: isPaused.value,
       });
@@ -281,7 +285,7 @@ export function callUseSubscription<
     watchEffect(() => {
       source.value = !isPaused.value
         ? client.value.executeSubscription<T, V>(input.value.request, {
-            ...unref(args.context),
+            ...toValue(args.context),
           })
         : undefined;
     }, watchOptions)
@@ -333,7 +337,7 @@ export function callUseSubscription<
       source.value = client.value.executeSubscription<T, V>(
         input.value.request,
         {
-          ...unref(args.context),
+          ...toValue(args.context),
           ...opts,
         }
       );
