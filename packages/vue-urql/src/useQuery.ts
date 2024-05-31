@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 
 import type { WatchStopHandle, Ref, MaybeRefOrGetter } from 'vue';
-import { shallowRef, ref, watchEffect, reactive, isRef, toValue } from 'vue';
+import { shallowRef, ref, watchEffect, reactive, toValue, toRef } from 'vue';
 
 import type { Subscription, Source } from 'wonka';
 import { pipe, subscribe, onEnd } from 'wonka';
@@ -19,6 +19,7 @@ import type {
 import { createRequest } from '@urql/core';
 
 import { useClient } from './useClient';
+
 import type { MaybeRefOrGetterObj } from './utils';
 import { updateShallowRef } from './utils';
 
@@ -253,9 +254,7 @@ export function callUseQuery<T = any, V extends AnyVariables = AnyVariables>(
   const operation: Ref<Operation<T, V> | undefined> = ref();
   const extensions: Ref<Record<string, any> | undefined> = ref();
 
-  const isPaused: Ref<boolean> = isRef(_args.pause)
-    ? _args.pause
-    : ref(!!_args.pause);
+  const isPaused: Ref<boolean> = toRef(_args.pause || false);
 
   const input = shallowRef({
     request: createRequest<T, V>(
