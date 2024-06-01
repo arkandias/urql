@@ -1,5 +1,12 @@
 # @urql/vue
 
+## 1.2.2
+
+### Patch Changes
+
+- ⚠️ Fix regression causing `pause` argument on `useQuery` and `useSubscription` to not be reactive
+  Submitted by [@kitten](https://github.com/kitten) (See [`502dab6ab718cd53effbda6e7c8ee835954bf2e1`](https://github.com/urql-graphql/urql/commit/502dab6ab718cd53effbda6e7c8ee835954bf2e1))
+
 ## 1.2.1
 
 ### Patch Changes
