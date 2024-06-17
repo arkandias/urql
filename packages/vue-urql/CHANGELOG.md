@@ -1,5 +1,12 @@
 # @urql/vue
 
+## 1.2.2
+
+### Patch Changes
+
+- Restore the possibility to use a getter for the pause property
+  Submitted by [@arkandias](https://github.com/arkandias) (See [`c2f68f82`](https://github.com/urql-graphql/urql/commit/c2f68f825ad907e0551e082525802c319e1386e0))
+
 ## 1.2.1
 
 ### Patch Changes
