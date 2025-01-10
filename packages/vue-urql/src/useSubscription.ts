@@ -16,7 +16,7 @@ import type {
 
 import { useClient } from './useClient';
 
-import type { MaybeRefOrGetter, MaybeRefOrGetterObj } from './utils';
+import type { MaybeRefOrGetter } from './utils';
 import { useRequestState, useClientState } from './utils';
 
 /** Input arguments for the {@link useSubscription} function.
@@ -55,7 +55,7 @@ export type UseSubscriptionArgs<
    * ```
    */
   context?: MaybeRefOrGetter<Partial<OperationContext>>;
-} & MaybeRefOrGetterObj<GraphQLRequestParams<Data, Variables>>;
+} & GraphQLRequestParams<Data, MaybeRefOrGetter<Variables>>;
 
 /** Combines previous data with an incoming subscription result’s data.
  *

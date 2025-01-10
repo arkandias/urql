@@ -16,9 +16,6 @@ import type { UseSubscriptionArgs } from './useSubscription';
 import type { UseQueryArgs } from './useQuery';
 
 export type MaybeRefOrGetter<T> = T | (() => T) | Ref<T>;
-export type MaybeRefOrGetterObj<T extends {}> = {
-  [K in keyof T]: MaybeRefOrGetter<T[K]>;
-};
 
 const isFunction = <T>(val: MaybeRefOrGetter<T>): val is () => T =>
   typeof val === 'function';
@@ -33,11 +30,11 @@ export const createRequestWithArgs = <
   args:
     | UseQueryArgs<T, V>
     | UseSubscriptionArgs<T, V>
-    | { query: MaybeRefOrGetter<DocumentInput<T, V>>; variables: V }
+    | { query: DocumentInput<T, V>; variables: V }
 ): GraphQLRequest<T, V> => {
   const _args = toValue(args);
   return createRequest<T, V>(
-    toValue(_args.query),
+    _args.query,
     toValue(_args.variables as MaybeRefOrGetter<V>)
   );
 };

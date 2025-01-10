@@ -18,7 +18,7 @@ import type {
 
 import { useClient } from './useClient';
 
-import type { MaybeRefOrGetter, MaybeRefOrGetterObj } from './utils';
+import type { MaybeRefOrGetter } from './utils';
 import { useRequestState, useClientState } from './utils';
 
 /** Input arguments for the {@link useQuery} function.
@@ -73,7 +73,7 @@ export type UseQueryArgs<
    * documentation on the `pause` option.
    */
   pause?: MaybeRefOrGetter<boolean>;
-} & MaybeRefOrGetterObj<GraphQLRequestParams<Data, Variables>>;
+} & GraphQLRequestParams<Data, MaybeRefOrGetter<Variables>>;
 
 /** State of the current query, your {@link useQuery} function is executing.
  *

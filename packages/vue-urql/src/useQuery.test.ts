@@ -78,36 +78,6 @@ describe('useQuery', () => {
     expect(query.data.value).toEqual({ test: true });
   });
 
-  it('runs queries as a promise-like that resolves even when the query changes', async () => {
-    const executeQuery = vi
-      .spyOn(client, 'executeQuery')
-      .mockImplementation(request => {
-        return pipe(
-          fromValue({ operation: request, data: { test: true } }),
-          delay(1)
-        ) as any;
-      });
-
-    const doc = ref('{ test }');
-
-    const query$ = useQuery({
-      query: doc,
-    });
-
-    doc.value = '{ test2 }';
-
-    await query$;
-
-    expect(executeQuery).toHaveBeenCalledTimes(2);
-    expect(query$.fetching.value).toBe(false);
-    expect(query$.data.value).toEqual({ test: true });
-
-    expect(query$.operation.value).toHaveProperty(
-      'query.definitions.0.selectionSet.selections.0.name.value',
-      'test2'
-    );
-  });
-
   it('reacts to variables changing', async () => {
     const executeQuery = vi
       .spyOn(client, 'executeQuery')
