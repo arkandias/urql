@@ -1,5 +1,12 @@
 # @urql/vue
 
+## 1.5.0
+
+### Minor Changes
+
+- Fix regression breaking `variables` typing
+  Submitted by [@arkandias](https://github.com/arkandias) (See [`2a3bea5`](https://github.com/urql-graphql/urql/commit/2a3bea582edb25136994c0796ff3cffea392e164))
+
 ## 1.4.3
 
 ### Patch Changes
